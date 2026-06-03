@@ -52,6 +52,11 @@ def main() -> None:
         interval_between_recordings // 60,
         "minutes",
     )
+    print(
+        "Interval between soil moisture measurements:",
+        interval_between_soil_moisture_measurements // 60,
+        "minutes",
+    )
     print("Maximum number of recordings:", max_recordings)
     print("―" * 100)
 
