@@ -20,9 +20,7 @@ def main() -> None:
 
     recording_duration = config["recording_duration"]
     interval_between_recordings = config["interval_between_recordings"]
-    interval_between_soil_moisture_measurements = config[
-        "interval_between_soil_moisture_measurements"
-    ]
+    interval_between_measurements = config["interval_between_measurements"]
     max_recordings = config["max_recordings"]
     serial_port = config["serial_port"]
 
@@ -34,8 +32,8 @@ def main() -> None:
         "minutes",
     )
     print(
-        "Interval between soil moisture measurements:",
-        interval_between_soil_moisture_measurements // 60,
+        "Interval between measurements:",
+        interval_between_measurements // 60,
         "minutes",
     )
     print("Maximum number of recordings:", max_recordings)
@@ -54,7 +52,7 @@ def main() -> None:
 
         t1 = threading.Thread(
             target=soil_moisture_loop,
-            args=(serial_port, interval_between_soil_moisture_measurements),
+            args=(serial_port, interval_between_measurements),
             daemon=True,
         )
         t2 = threading.Thread(target=video_loop, args=(recorder, max_recordings))
