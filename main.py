@@ -10,6 +10,24 @@ from src.camera_recorder import CameraRecorder
 from src.soil_moisture_sensor import trigger_measurement
 
 
+def humidity_loop(serial_port: str, interval: int) -> None:
+    while True:
+        result, message = trigger_measurement(port=serial_port)
+        if result:
+            print("Humidity reading acquired successfully:")
+            print(message)
+        else:
+            print("Failed to acquire humidity reading:")
+            print(message)
+        time.sleep(interval)
+
+
+def video_loop(recorder: CameraRecorder, max_recordings: int) -> None:
+    for _ in range(max_recordings):
+        recorder.record_video()
+        recorder.wait_until_next_recording()
+
+
 def main() -> None:
     load_dotenv()
 
@@ -21,6 +39,9 @@ def main() -> None:
 
     recording_duration = config["recording_duration"]
     interval_between_recordings = config["interval_between_recordings"]
+    interval_between_soil_moisture_measurements = config[
+        "interval_between_soil_moisture_measurements"
+    ]
     max_recordings = config["max_recordings"]
     serial_port = config["serial_port"]
 
@@ -45,42 +66,17 @@ def main() -> None:
         recorder.start_process()
         recorder.setup_camera_connection()
 
-        def humidity_loop(serial_port):
-            while True:
-                result, message = trigger_measurement(port=serial_port)
-                if result:
-                    print("Humidity reading acquired successfully:")
-                    print(message)
-                else:
-                    print("Failed to acquire humidity reading:")
-                    print(message)
-                time.sleep(300)
-
-        def video_loop(recorder, max_recordings):
-            for _ in range(max_recordings):
-                recorder.record_video()
-                recorder.wait_until_next_recording()
-
-        t1 = threading.Thread(target=humidity_loop, args=(serial_port,), daemon=True)
+        t1 = threading.Thread(
+            target=humidity_loop,
+            args=(serial_port, interval_between_soil_moisture_measurements),
+            daemon=True,
+        )
         t2 = threading.Thread(target=video_loop, args=(recorder, max_recordings))
 
         t1.start()
         t2.start()
 
         t2.join()
-
-        # while True:
-        #     result, message = trigger_measurement(port=serial_port)
-        #     if result:
-        #         print("Humidity reading acquired successfully:")
-        #         print(message)
-        #     else:
-        #         print("Failed to acquire humidity reading:")
-        #         print(message)
-
-        # for _ in range(max_recordings):
-        #     recorder.record_video()
-        #     recorder.wait_until_next_recording()
     except KeyboardInterrupt:
         print("\nKeyboard interrupt received.")
     finally:

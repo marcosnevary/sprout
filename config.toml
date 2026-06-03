@@ -1,4 +1,5 @@
 recording_duration = 10
 interval_between_recordings = 1800
-max_recordings = 25
+interval_between_soil_moisture_measurements = 300
+max_recordings = 999999999
 serial_port = "/dev/ttyACM0"
