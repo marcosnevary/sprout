@@ -9,6 +9,8 @@ from rich.progress import (
     Progress,
 )
 
+from src.display import live
+
 console = Console()
 
 
@@ -94,6 +96,10 @@ class CameraRecorder:
             time.sleep(1)
             self.progress.update(self.record_task, advance=1)
         self.progress.update(self.record_task, visible=False)
+
+        live.console.print(
+            f"[bold green][{timestamp}] Recording #{self.recording_count} completed![/bold green]",
+        )
 
         self._send_command("1", delay=0)
         self._send_command("", delay=0)

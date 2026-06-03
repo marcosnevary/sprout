@@ -6,8 +6,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from src.camera_recorder import CameraRecorder
-from src.display import recorder_progress, sensor_progress
-from src.loops import live, soil_moisture_loop, video_loop
+from src.display import (
+    live,
+    recorder_progress,
+    sensor_progress,
+)
+from src.loops import soil_moisture_loop, video_loop
 from src.soil_moisture_sensor import SoilMoistureSensor
 
 

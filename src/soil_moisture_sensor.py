@@ -10,7 +10,7 @@ from rich.progress import (
     Progress,
 )
 
-from display import live
+from src.display import live
 
 BAUD_RATE = 115200
 FILE_NAME = "soil_moisture_measurements.csv"
@@ -61,7 +61,6 @@ class SoilMoistureSensor:
                     live.console.print(
                         f"[bold green][{timestamp}] Measurement #{self.measurement_count + 1} recorded:[/bold green] Sensor 1: {sensor_1}, Sensor 2: {sensor_2}",
                     )
-                    live.console.print()
 
                     self.measurement_count += 1
                     return
