@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from src.camera_recorder import CameraRecorder
 from src.loops import soil_moisture_loop, video_loop
+from src.soil_moisture_sensor import SoilMoistureSensor
 
 
 def main() -> None:
@@ -20,8 +21,10 @@ def main() -> None:
 
     recording_duration = config["recording_duration"]
     interval_between_recordings = config["interval_between_recordings"]
-    interval_between_measurements = config["interval_between_measurements"]
     max_recordings = config["max_recordings"]
+
+    interval_between_measurements = config["interval_between_measurements"]
+    trigger_character = config["trigger_character"]
     serial_port = config["serial_port"]
 
     print("―" * 100)
@@ -46,13 +49,19 @@ def main() -> None:
         ssh_password=ssh_password,
     )
 
+    soil_moisture_sensor = SoilMoistureSensor(
+        serial_port=serial_port,
+        interval_between_measurements=interval_between_measurements,
+        trigger_character=trigger_character,
+    )
+
     try:
         recorder.start_process()
         recorder.setup_camera_connection()
 
         t1 = threading.Thread(
             target=soil_moisture_loop,
-            args=(serial_port, interval_between_measurements),
+            args=(soil_moisture_sensor, max_recordings),
             daemon=True,
         )
         t2 = threading.Thread(target=video_loop, args=(recorder, max_recordings))
