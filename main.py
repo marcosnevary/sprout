@@ -1,31 +1,12 @@
 import os
 import threading
-import time
 import tomllib
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 from src.camera_recorder import CameraRecorder
-from src.soil_moisture_sensor import trigger_measurement
-
-
-def humidity_loop(serial_port: str, interval: int) -> None:
-    while True:
-        result, message = trigger_measurement(port=serial_port)
-        if result:
-            print("Humidity reading acquired successfully:")
-            print(message)
-        else:
-            print("Failed to acquire humidity reading:")
-            print(message)
-        time.sleep(interval)
-
-
-def video_loop(recorder: CameraRecorder, max_recordings: int) -> None:
-    for _ in range(max_recordings):
-        recorder.record_video()
-        recorder.wait_until_next_recording()
+from src.loops import soil_moisture_loop, video_loop
 
 
 def main() -> None:
@@ -72,7 +53,7 @@ def main() -> None:
         recorder.setup_camera_connection()
 
         t1 = threading.Thread(
-            target=humidity_loop,
+            target=soil_moisture_loop,
             args=(serial_port, interval_between_soil_moisture_measurements),
             daemon=True,
         )
