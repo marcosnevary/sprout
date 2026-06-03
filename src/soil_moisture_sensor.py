@@ -6,14 +6,11 @@ from zoneinfo import ZoneInfo
 
 import serial
 from rich.console import Console
-from rich.live import Live
 from rich.progress import (
-    BarColumn,
     Progress,
-    SpinnerColumn,
-    TextColumn,
-    TimeRemainingColumn,
 )
+
+from display import live
 
 BAUD_RATE = 115200
 FILE_NAME = "soil_moisture_measurements.csv"
@@ -29,11 +26,15 @@ class SoilMoistureSensor:
         serial_port: str,
         interval_between_measurements: int,
         trigger_character: str,
+        progress: Progress,
     ) -> None:
         self.serial_port = serial_port
         self.trigger_character = trigger_character
         self.interval_between_measurements = interval_between_measurements
         self.measurement_count = 0
+
+        self.progress = progress
+        self.wait_task = self.progress.add_task("", total=0, visible=False)
 
     def trigger_measurement(
         self,
@@ -57,9 +58,10 @@ class SoilMoistureSensor:
                             writer.writerow(["timestamp", "sensor_1", "sensor_2"])
                         writer.writerow([timestamp, sensor_1, sensor_2])
 
-                    console.print(
+                    live.console.print(
                         f"[bold green][{timestamp}] Measurement #{self.measurement_count + 1} recorded:[/bold green] Sensor 1: {sensor_1}, Sensor 2: {sensor_2}",
                     )
+                    live.console.print()
 
                     self.measurement_count += 1
                     return
@@ -79,31 +81,16 @@ class SoilMoistureSensor:
             )
 
     def wait_until_next_measurement(self) -> None:
-        wait_progress = Progress(
-            SpinnerColumn(),
-            TextColumn(
-                f"[bold yellow][{datetime.now(tz=ZoneInfo('America/Sao_Paulo')).strftime('%Y-%m-%d %H:%M:%S')}] Waiting for next measurement[/bold yellow]",
-            ),
-            BarColumn(),
-            TextColumn("{task.completed}/{task.total}s"),
-            TimeRemainingColumn(),
+        timestamp = datetime.now(tz=ZoneInfo("America/Sao_Paulo")).strftime(
+            "%Y-%m-%d %H:%M:%S",
         )
-
-        wait_task = wait_progress.add_task(
-            "",
+        self.progress.reset(
+            self.wait_task,
             total=self.interval_between_measurements,
+            visible=True,
+            description=f"[bold yellow][{timestamp}] Waiting for next measurement[/bold yellow]",
         )
-
-        with Live(wait_progress, refresh_per_second=10):
-            for _ in range(self.interval_between_measurements):
-                time.sleep(1)
-                wait_progress.update(wait_task, advance=1)
-
-
-if __name__ == "__main__":
-    soil_moisture_sensor = SoilMoistureSensor(
-        serial_port="/dev/ttyACM0",
-        interval_between_measurements=300,
-        trigger_character="g",
-    )
-    soil_moisture_sensor.trigger_measurement()
+        for _ in range(self.interval_between_measurements):
+            time.sleep(1)
+            self.progress.update(self.wait_task, advance=1)
+        self.progress.update(self.wait_task, visible=False)

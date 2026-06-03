@@ -5,13 +5,8 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from rich.console import Console
-from rich.live import Live
 from rich.progress import (
-    BarColumn,
     Progress,
-    SpinnerColumn,
-    TextColumn,
-    TimeRemainingColumn,
 )
 
 console = Console()
@@ -24,6 +19,7 @@ class CameraRecorder:
         recording_duration: int,
         interval_between_recordings: int,
         ssh_password: str,
+        progress: Progress,
     ) -> None:
         self.remote_cli_path = remote_cli_path
         self.ssh_password = ssh_password
@@ -31,6 +27,10 @@ class CameraRecorder:
         self.interval_between_recordings = interval_between_recordings
         self.process = None
         self.recording_count = 0
+
+        self.progress = progress
+        self.wait_task = self.progress.add_task("", total=0, visible=False)
+        self.record_task = self.progress.add_task("", total=0, visible=False)
 
     def _send_command(
         self,
@@ -81,51 +81,37 @@ class CameraRecorder:
         self._send_command("6", delay=0)
         self._send_command("y", delay=0)
 
-        recording_progress = Progress(
-            SpinnerColumn(),
-            TextColumn(
-                f"[bold cyan][{datetime.now(tz=ZoneInfo('America/Sao_Paulo')).strftime('%Y-%m-%d %H:%M:%S')}] Recording #{self.recording_count}[/bold cyan]",
-            ),
-            BarColumn(),
-            TextColumn("{task.completed}/{task.total}s"),
-            TimeRemainingColumn(),
+        timestamp = datetime.now(tz=ZoneInfo("America/Sao_Paulo")).strftime(
+            "%Y-%m-%d %H:%M:%S",
         )
-
-        recording_task = recording_progress.add_task(
-            "",
+        self.progress.reset(
+            self.record_task,
             total=self.recording_duration,
+            visible=True,
+            description=f"[bold cyan][{timestamp}] Recording #{self.recording_count}[/bold cyan]",
         )
-
-        with Live(recording_progress, refresh_per_second=10):
-            for _ in range(self.recording_duration):
-                time.sleep(1)
-                recording_progress.update(recording_task, advance=1)
+        for _ in range(self.recording_duration):
+            time.sleep(1)
+            self.progress.update(self.record_task, advance=1)
+        self.progress.update(self.record_task, visible=False)
 
         self._send_command("1", delay=0)
         self._send_command("", delay=0)
 
     def wait_until_next_recording(self) -> None:
-        wait_progress = Progress(
-            SpinnerColumn(),
-            TextColumn(
-                f"[bold yellow][{datetime.now(tz=ZoneInfo('America/Sao_Paulo')).strftime('%Y-%m-%d %H:%M:%S')}] Waiting for next recording[/bold yellow]",
-            ),
-            BarColumn(),
-            TextColumn("{task.completed}/{task.total}s"),
-            TimeRemainingColumn(),
+        timestamp = datetime.now(tz=ZoneInfo("America/Sao_Paulo")).strftime(
+            "%Y-%m-%d %H:%M:%S",
         )
-
-        wait_task = wait_progress.add_task(
-            "",
+        self.progress.reset(
+            self.wait_task,
             total=self.interval_between_recordings,
+            visible=True,
+            description=f"[bold yellow][{timestamp}] Waiting for next recording[/bold yellow]",
         )
-
-        with Live(wait_progress, refresh_per_second=10):
-            for _ in range(self.interval_between_recordings):
-                time.sleep(1)
-                wait_progress.update(wait_task, advance=1)
-
-        print("―" * 100)
+        for _ in range(self.interval_between_recordings):
+            time.sleep(1)
+            self.progress.update(self.wait_task, advance=1)
+        self.progress.update(self.wait_task, visible=False)
 
     def cleanup(self) -> None:
         print("Cleaning up process...")
