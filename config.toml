@@ -1,4 +1,4 @@
 recording_duration = 10
 interval_between_recordings = 1800
 max_recordings = 25
-serial_port = "/dev/ttyUSB0"
+serial_port = "/dev/ttyACM0"

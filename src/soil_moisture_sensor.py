@@ -61,6 +61,6 @@ def trigger_measurement(
 
 
 if __name__ == "__main__":
-    result, message = trigger_measurement(port="/dev/ttyUSB0")
+    result, message = trigger_measurement(port="/dev/ttyACM0")
 
     print(message)
