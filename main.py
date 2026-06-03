@@ -34,12 +34,15 @@ def main() -> None:
         interval_between_recordings // 60,
         "minutes",
     )
+    print("Maximum number of recordings:", max_recordings)
     print(
         "Interval between measurements:",
         interval_between_measurements // 60,
         "minutes",
     )
-    print("Maximum number of recordings:", max_recordings)
+    print("Maximum number of measurements:", config["max_measurements"])
+    print("Serial port:", serial_port)
+    print("Trigger character:", trigger_character)
     print("―" * 100)
 
     recorder = CameraRecorder(
