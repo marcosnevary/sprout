@@ -4,4 +4,10 @@ version = "0.1.0"
 description = "Automated plant monitoring system that records videos and collects soil moisture data to track plant conditions."
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["pyserial>=3.5", "python-dotenv>=1.2.2", "rich>=15.0.0"]
+dependencies = [
+    "google-auth>=2.53.0",
+    "gspread>=6.2.1",
+    "pyserial>=3.5",
+    "python-dotenv>=1.2.2",
+    "rich>=15.0.0",
+]

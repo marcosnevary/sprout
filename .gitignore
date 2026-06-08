@@ -12,3 +12,4 @@ wheels/
 # Other files to ignore
 backup/
 .env
+credentials.json

@@ -4,6 +4,7 @@ import tomllib
 from pathlib import Path
 
 from dotenv import load_dotenv
+from src.google_sheet import get_sheet
 
 from src.camera_recorder import CameraRecorder
 from src.display import (
@@ -31,6 +32,11 @@ def main() -> None:
     interval_between_measurements = config["interval_between_measurements"]
     trigger_character = config["trigger_character"]
     serial_port = config["serial_port"]
+
+    credentials_file = os.getenv("GOOGLE_CREDENTIALS_FILE")
+    sheet_name = os.getenv("GOOGLE_SHEET_NAME")
+
+    sheet = get_sheet(credentials_file, sheet_name)
 
     print("―" * 100)
     print("Recording duration:", recording_duration, "seconds")
@@ -63,6 +69,7 @@ def main() -> None:
         interval_between_measurements=interval_between_measurements,
         trigger_character=trigger_character,
         progress=sensor_progress,
+        sheet=sheet,
     )
 
     try:
