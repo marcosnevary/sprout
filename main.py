@@ -4,7 +4,6 @@ import tomllib
 from pathlib import Path
 
 from dotenv import load_dotenv
-from src.google_sheet import get_sheet
 
 from src.camera_recorder import CameraRecorder
 from src.display import (
@@ -12,6 +11,7 @@ from src.display import (
     recorder_progress,
     sensor_progress,
 )
+from src.google_sheets import get_sheet
 from src.loops import soil_moisture_loop, video_loop
 from src.soil_moisture_sensor import SoilMoistureSensor
 

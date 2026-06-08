@@ -1,7 +1,10 @@
+import logging
 import subprocess
+import threading
 import time
 from contextlib import suppress
 from datetime import datetime
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from rich.console import Console
@@ -12,6 +15,27 @@ from rich.progress import (
 from src.display import live
 
 console = Console()
+
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(exist_ok=True)
+
+logger = logging.getLogger("camera_recorder")
+logger.setLevel(logging.INFO)
+
+file_handler = logging.FileHandler(
+    LOG_DIR / "commands.log",
+    encoding="utf-8",
+)
+
+formatter = logging.Formatter(
+    "%(asctime)s.%(msecs)03d | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.propagate = False
 
 
 class CameraRecorder:
@@ -34,18 +58,50 @@ class CameraRecorder:
         self.wait_task = self.progress.add_task("", total=0, visible=False)
         self.record_task = self.progress.add_task("", total=0, visible=False)
 
+    def _log_stdout(self) -> None:
+        try:
+            for line in self.process.stdout:
+                logger.info("STDOUT %s", line.rstrip())
+        except Exception as error:
+            logger.exception("STDOUT_THREAD_ERROR: %s", error)  # noqa: TRY401
+
+    def _log_stderr(self) -> None:
+        try:
+            for line in self.process.stderr:
+                logger.info("STDERR %s", line.rstrip())
+        except Exception as error:
+            logger.exception("STDERR_THREAD_ERROR: %s", error)  # noqa: TRY401
+
     def _send_command(
         self,
         command: str,
         delay: float = 1.0,
     ) -> None:
+        logger.info(
+            "SEND %r delay=%.3f",
+            command,
+            delay,
+        )
+
+        start = time.monotonic()
+
         self.process.stdin.write(f"{command}\n")
         self.process.stdin.flush()
+
+        flush_time = time.monotonic() - start
+
+        logger.info(
+            "FLUSH %r took %.3fs",
+            command,
+            flush_time,
+        )
 
         time.sleep(delay)
 
     def start_process(self) -> None:
         print("Starting RemoteCli process...")
+
+        logger.info("PROCESS_START")
 
         self.process = subprocess.Popen(  # noqa: S603
             [self.remote_cli_path],
@@ -56,12 +112,26 @@ class CameraRecorder:
             bufsize=1,
         )
 
+        threading.Thread(
+            target=self._log_stdout,
+            daemon=True,
+        ).start()
+
+        threading.Thread(
+            target=self._log_stderr,
+            daemon=True,
+        ).start()
+
         time.sleep(5)
+
+        logger.info("PROCESS_STARTED")
 
         print("RemoteCli started successfully")
 
     def setup_camera_connection(self) -> None:
         print("Connecting to camera...")
+
+        logger.info("CAMERA_CONNECTION_START")
 
         self._send_command("1")
         self._send_command("1")
@@ -69,11 +139,19 @@ class CameraRecorder:
         self._send_command(self.ssh_password)
         self._send_command("1")
 
+        logger.info("CAMERA_CONNECTION_DONE")
+
         print("Camera connected successfully")
         print("―" * 100)
 
     def record_video(self) -> None:
         self.recording_count += 1
+
+        logger.info(
+            "RECORDING_START #%s duration=%ss",
+            self.recording_count,
+            self.recording_duration,
+        )
 
         self._send_command("6", delay=0)
         self._send_command("y", delay=0)
@@ -99,6 +177,11 @@ class CameraRecorder:
 
         live.console.print(
             f"[bold green][{timestamp}] Recording #{self.recording_count} completed![/bold green]",
+        )
+
+        logger.info(
+            "RECORDING_STOP #%s",
+            self.recording_count,
         )
 
         self._send_command("1", delay=0)

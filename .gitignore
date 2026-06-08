@@ -13,3 +13,4 @@ wheels/
 backup/
 .env
 credentials.json
+logs/
