@@ -3,10 +3,12 @@ import os
 import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 
 from scripts.google_sheets import get_sheet
+from src.display import live
 
 load_dotenv()
 
@@ -114,8 +116,6 @@ def upload_video_metadata_to_google_sheets() -> None:
         if video.name in processed:
             continue
 
-        print(f"Processing {video}...")
-
         info = get_video_metadata(video)
 
         sheet.append_row(
@@ -132,6 +132,11 @@ def upload_video_metadata_to_google_sheets() -> None:
 
         processed.add(video.name)
 
-        print(f"Metadata for {video} added.")
+        timestamp = datetime.now(tz=ZoneInfo("America/Sao_Paulo")).strftime(
+            "%Y-%m-%d %H:%M:%S",
+        )
+        live.console.print(
+            f"[bold green][{timestamp}] Metadata for {video} added.[/bold green]",
+        )
 
     save_processed_videos(processed)
