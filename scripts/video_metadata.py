@@ -21,6 +21,8 @@ def load_processed_videos() -> set:
 
 
 def save_processed_videos(processed_videos: set) -> None:
+    PROCESSED_VIDEOS_FILE.parent.mkdir(parents=True, exist_ok=True)
+
     PROCESSED_VIDEOS_FILE.write_text(
         json.dumps(list(processed_videos), indent=2),
     )
