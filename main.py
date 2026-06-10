@@ -5,13 +5,13 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from scripts.google_sheets import get_sheet
 from src.camera_recorder import CameraRecorder
 from src.display import (
     live,
     recorder_progress,
     sensor_progress,
 )
-from src.google_sheets import get_sheet
 from src.loops import soil_moisture_loop, video_loop
 from src.soil_moisture_sensor import SoilMoistureSensor
 
@@ -34,9 +34,16 @@ def main() -> None:
     serial_port = config["serial_port"]
 
     credentials_file = os.getenv("GOOGLE_CREDENTIALS_FILE")
-    sheet_name = os.getenv("GOOGLE_SHEET_NAME")
+    spreadsheet_name = os.getenv("GOOGLE_SPREADSHEET_NAME")
+    worksheet_name = os.getenv("SOIL_MOISTURE_MEASUREMENTS_WORKSHEET_NAME")
+    header = ["timestamp", "sensor_1", "sensor_2"]
 
-    sheet = get_sheet(credentials_file, sheet_name)
+    sheet = get_sheet(
+        credentials_file=credentials_file,
+        spreadsheet_name=spreadsheet_name,
+        worksheet_name=worksheet_name,
+        header=header,
+    )
 
     print("―" * 100)
     print("Recording duration:", recording_duration, "seconds")

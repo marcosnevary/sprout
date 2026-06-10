@@ -4,7 +4,9 @@ from google.oauth2.service_account import Credentials
 
 def get_sheet(
     credentials_file: str,
-    sheet_name: str,
+    spreadsheet_name: str,
+    worksheet_name: str,
+    header: list[str] | None = None,
 ) -> gspread.Spreadsheet:
     SCOPES = [
         "https://www.googleapis.com/auth/spreadsheets",
@@ -17,15 +19,10 @@ def get_sheet(
     )
 
     client = gspread.authorize(creds)
-    sheet = client.open(sheet_name).sheet1
+    spreadsheet = client.open(spreadsheet_name)
+    sheet = spreadsheet.worksheet(worksheet_name)
 
     if not sheet.row_values(1):
-        sheet.append_row(
-            [
-                "timestamp",
-                "sensor_1",
-                "sensor_2",
-            ],
-        )
+        sheet.append_row(header)
 
     return sheet

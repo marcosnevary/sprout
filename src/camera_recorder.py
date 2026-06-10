@@ -153,13 +153,9 @@ class CameraRecorder:
             self.recording_duration,
         )
 
-        self._send_command("6", delay=0)
-        self._send_command("y", delay=0)
-
-        self._send_command("2", delay=0)
-        self._send_command("", delay=0)
-        self._send_command("6", delay=0)
-        self._send_command("y", delay=0)
+        self._send_command("6", delay=0)  # Movie Rec Button
+        self._send_command("y", delay=0)  # Confirm Movie Rec Button
+        self._send_command("2", delay=0)  # Down
 
         timestamp = datetime.now(tz=ZoneInfo("America/Sao_Paulo")).strftime(
             "%Y-%m-%d %H:%M:%S",
@@ -184,8 +180,9 @@ class CameraRecorder:
             self.recording_count,
         )
 
-        self._send_command("1", delay=0)
-        self._send_command("", delay=0)
+        self._send_command("6", delay=0)  # Movie Rec Button
+        self._send_command("y", delay=0)  # Confirm Movie Rec Button
+        self._send_command("1", delay=0)  # Up
 
     def wait_until_next_recording(self) -> None:
         timestamp = datetime.now(tz=ZoneInfo("America/Sao_Paulo")).strftime(
