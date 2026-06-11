@@ -35,14 +35,31 @@ def main() -> None:
 
     credentials_file = os.getenv("GOOGLE_CREDENTIALS_FILE")
     spreadsheet_name = os.getenv("GOOGLE_SPREADSHEET_NAME")
-    worksheet_name = os.getenv("SOIL_MOISTURE_MEASUREMENTS_WORKSHEET_NAME")
-    header = ["timestamp", "sensor_1", "sensor_2"]
 
-    sheet = get_sheet(
+    worksheet_name = os.getenv("SOIL_MOISTURE_MEASUREMENTS_WORKSHEET_NAME")
+    soil_moisture_header = ["timestamp", "sensor_1", "sensor_2"]
+    soil_moisture_sheet = get_sheet(
         credentials_file=credentials_file,
         spreadsheet_name=spreadsheet_name,
         worksheet_name=worksheet_name,
-        header=header,
+        header=soil_moisture_header,
+    )
+
+    video_metadata_worksheet_name = os.getenv("VIDEO_METADATA_WORKSHEET_NAME")
+    video_metadata_header = [
+        "video_timestamp",
+        "video_name",
+        "video_duration_seconds",
+        "video_size_mb",
+        "video_width_px",
+        "video_height_px",
+        "video_fps",
+    ]
+    video_metadata_sheet = get_sheet(
+        credentials_file=credentials_file,
+        spreadsheet_name=spreadsheet_name,
+        worksheet_name=video_metadata_worksheet_name,
+        header=video_metadata_header,
     )
 
     print("―" * 100)
@@ -76,7 +93,7 @@ def main() -> None:
         interval_between_measurements=interval_between_measurements,
         trigger_character=trigger_character,
         progress=sensor_progress,
-        sheet=sheet,
+        sheet=soil_moisture_sheet,
     )
 
     try:
@@ -91,7 +108,7 @@ def main() -> None:
             )
             t2 = threading.Thread(
                 target=video_loop,
-                args=(camera_recorder, max_recordings),
+                args=(camera_recorder, max_recordings, video_metadata_sheet),
             )
             t1.start()
             t2.start()

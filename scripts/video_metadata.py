@@ -1,3 +1,4 @@
+import csv
 import json
 import os
 import subprocess
@@ -7,12 +8,13 @@ from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 
-from scripts.google_sheets import get_sheet
 from src.display import live
 
 load_dotenv()
 
 PROCESSED_VIDEOS_FILE = Path(os.getenv("PROCESSED_VIDEOS_FILE"))
+FILE_NAME = "video_metadata.csv"
+DATA_PATH = Path("data") / FILE_NAME
 
 
 def load_processed_videos() -> set:
@@ -85,58 +87,76 @@ def get_video_metadata(video_path: str) -> dict:
     }
 
 
-def upload_video_metadata_to_google_sheets() -> None:
+def upload_video_metadata_to_google_sheets(video_metadata_sheet: object) -> None:
     load_dotenv()
-
     videos_path = os.getenv("VIDEOS_PATH")
-    credentials_file = os.getenv("GOOGLE_CREDENTIALS_FILE")
-    spreadsheet_name = os.getenv("GOOGLE_SPREADSHEET_NAME")
-    worksheet_name = os.getenv("VIDEO_METADATA_WORKSHEET_NAME")
-
-    header = [
-        "video_timestamp",
-        "video_name",
-        "video_duration_seconds",
-        "video_size_mb",
-        "video_width_px",
-        "video_height_px",
-        "video_fps",
-    ]
-
-    sheet = get_sheet(
-        credentials_file=credentials_file,
-        spreadsheet_name=spreadsheet_name,
-        worksheet_name=worksheet_name,
-        header=header,
-    )
 
     processed = load_processed_videos()
 
     for video in Path(videos_path).glob("*.MP4"):
-        if video.name in processed:
-            continue
+        if video.name not in processed:
+            info = get_video_metadata(video)
 
-        info = get_video_metadata(video)
+            DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
+            file_exists = DATA_PATH.exists()
 
-        sheet.append_row(
-            [
-                str(info["video_timestamp"]),
-                info["video_name"],
-                info["video_duration_seconds"],
-                info["video_size_mb"],
-                info["video_width_px"],
-                info["video_height_px"],
-                info["video_fps"],
-            ],
-        )
+            with DATA_PATH.open(
+                "a",
+                encoding="utf-8",
+                newline="",
+            ) as file:
+                writer = csv.writer(file)
 
-        processed.add(video.name)
+                if not file_exists:
+                    writer.writerow(
+                        [
+                            "video_timestamp",
+                            "video_name",
+                            "video_duration_seconds",
+                            "video_size_mb",
+                            "video_width_px",
+                            "video_height_px",
+                            "video_fps",
+                        ],
+                    )
 
-        timestamp = datetime.now(tz=ZoneInfo("America/Sao_Paulo")).strftime(
-            "%Y-%m-%d %H:%M:%S",
-        )
-        live.console.print(
-            f"[bold green][{timestamp}] Metadata for {video} added.[/bold green]",
-        )
+                writer.writerow(
+                    [
+                        info["video_timestamp"],
+                        info["video_name"],
+                        info["video_duration_seconds"],
+                        info["video_size_mb"],
+                        info["video_width_px"],
+                        info["video_height_px"],
+                        info["video_fps"],
+                    ],
+                )
+
+            try:
+                video_metadata_sheet.append_row(
+                    [
+                        str(info["video_timestamp"]),
+                        info["video_name"],
+                        info["video_duration_seconds"],
+                        info["video_size_mb"],
+                        info["video_width_px"],
+                        info["video_height_px"],
+                        info["video_fps"],
+                    ],
+                )
+            except Exception as e:
+                live.console.print(
+                    f"[bold red]Error uploading metadata for {video}: {e}[/bold red]",
+                )
+                continue
+
+            processed.add(video.name)
+
+            timestamp = datetime.now(tz=ZoneInfo("America/Sao_Paulo")).strftime(
+                "%Y-%m-%d %H:%M:%S",
+            )
+            live.console.print(
+                f"[bold green][{timestamp}] Metadata for {video} added.[/bold green]",
+            )
 
     save_processed_videos(processed)

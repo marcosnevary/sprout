@@ -13,9 +13,13 @@ def soil_moisture_loop(
             soil_moisture_sensor.wait_until_next_measurement()
 
 
-def video_loop(recorder: CameraRecorder, max_recordings: int) -> None:
+def video_loop(
+    recorder: CameraRecorder,
+    max_recordings: int,
+    video_metadata_sheet: object,
+) -> None:
     for i in range(max_recordings):
         recorder.record_video()
         if i < max_recordings - 1:
             recorder.wait_until_next_recording()
-        upload_video_metadata_to_google_sheets()
+        upload_video_metadata_to_google_sheets(video_metadata_sheet)
