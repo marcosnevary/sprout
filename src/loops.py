@@ -1,4 +1,4 @@
-from scripts.video_metadata import upload_video_metadata_to_google_sheets
+from scripts.video_metadata import save_video_metadata
 from src.camera_recorder import CameraRecorder
 from src.soil_moisture_sensor import SoilMoistureSensor
 
@@ -22,5 +22,4 @@ def video_loop(
         recorder.record_video()
         if i < max_recordings - 1:
             recorder.wait_until_next_recording()
-        if video_metadata_sheet:
-            upload_video_metadata_to_google_sheets(video_metadata_sheet)
+        save_video_metadata(video_metadata_sheet)

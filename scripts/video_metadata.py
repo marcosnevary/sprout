@@ -87,7 +87,7 @@ def get_video_metadata(video_path: str) -> dict:
     }
 
 
-def upload_video_metadata_to_google_sheets(video_metadata_sheet: object) -> None:
+def save_video_metadata(video_metadata_sheet: object) -> None:
     load_dotenv()
     videos_path = os.getenv("VIDEOS_PATH")
 
