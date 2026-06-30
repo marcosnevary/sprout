@@ -25,7 +25,7 @@ class SoilMoistureSensor:
         interval_between_measurements: int,
         trigger_character: str,
         progress: Progress,
-        sheet: gspread.Spreadsheet,
+        sheet: gspread.Spreadsheet | None,
     ) -> None:
         self.serial_port = serial_port
         self.trigger_character = trigger_character
