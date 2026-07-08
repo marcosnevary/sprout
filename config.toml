@@ -1,7 +1,0 @@
-recording_duration = 10
-interval_between_recordings = 1800
-interval_between_measurements = 300
-max_recordings = 999999999
-max_measurements = 999999999
-serial_port = "/dev/ttyACM0"
-trigger_character = "g"
