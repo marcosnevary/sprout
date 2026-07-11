@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 
 RECORDING_HEADER = (
-    "name",
     "timestamp",
-    "duration",
-    "size",
-    "width",
-    "height",
+    "filename",
+    "duration_seconds",
+    "size_mb",
+    "width_px",
+    "height_px",
     "fps",
 )
 
