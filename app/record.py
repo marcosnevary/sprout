@@ -1,10 +1,9 @@
-import time
-
 from config.app import DATA_PATH, SPREADSHEET_NAME
 from config.recording import RECORDING_CONFIG, RECORDING_HEADER
 from devices.camera import Camera
 from storage.csv import initialize_csv, save_metadata_to_csv
 from storage.google_sheets import initialize_worksheet, save_metadata_to_worksheet
+from utils.time import countdown, current_timestamp
 from video.files import get_latest_video_index, get_video_path
 from video.metadata import extract_video_metadata
 
@@ -35,10 +34,12 @@ def main() -> None:
 
     latest_video_index = get_latest_video_index(RECORDING_CONFIG.videos_path)
 
-    for _ in range(RECORDING_CONFIG.max_recordings):
+    for i in range(RECORDING_CONFIG.max_recordings):
         camera.record()
 
-        time.sleep(RECORDING_CONFIG.upload_duration)
+        print(f"[{current_timestamp()}] Recording {i + 1} completed.")
+
+        countdown(RECORDING_CONFIG.upload_duration, "Time for upload to complete")
 
         latest_video_index += 1
         latest_video_path = get_video_path(
@@ -54,7 +55,10 @@ def main() -> None:
             if worksheet:
                 save_metadata_to_worksheet(metadata, worksheet)
 
-        time.sleep(RECORDING_CONFIG.interval_between_recordings)
+        countdown(
+            RECORDING_CONFIG.interval_between_recordings,
+            "Time until next recording",
+        )
 
 
 if __name__ == "__main__":

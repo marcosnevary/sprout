@@ -1,4 +1,4 @@
 from pathlib import Path
 
-SPREADSHEET_NAME = "PlantWatch"
+SPREADSHEET_NAME = "sprout"
 DATA_PATH = Path("data")

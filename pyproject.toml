@@ -1,5 +1,5 @@
 [project]
-name = "plant-watch"
+name = "sprout"
 version = "0.1.0"
 description = "Automated plant monitoring system that records videos and collects soil moisture data to track plant conditions."
 readme = "README.md"
