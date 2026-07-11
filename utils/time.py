@@ -2,7 +2,7 @@ import time
 
 
 def current_timestamp() -> str:
-    return time.strftime("%d-%m-%Y %H:%M:%S", time.localtime())
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
 
 def countdown(interval: int, message: str) -> None:
