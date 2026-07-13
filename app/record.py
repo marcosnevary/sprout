@@ -39,11 +39,14 @@ def main() -> None:
     for i in range(RECORDING_CONFIG.max_recordings):
         camera.record()
 
-        print(f"[{current_timestamp()}] Recording {i + 1} completed.")
+        latest_video_index += 1
+
+        print(
+            f"[{current_timestamp()}] Recording {i + 1} completed (C{latest_video_index}.MP4)."
+        )
 
         countdown(RECORDING_CONFIG.upload_duration, "Time for upload to complete")
 
-        latest_video_index += 1
         latest_video_path = get_video_path(
             videos_path,
             latest_video_index,

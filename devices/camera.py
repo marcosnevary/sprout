@@ -25,6 +25,8 @@ class Camera:
             bufsize=1,
         )
 
+        time.sleep(5)
+
     def _send_command(self, command: str) -> None:
         self.remote_cli.stdin.write(f"{command}\n")
         self.remote_cli.stdin.flush()
@@ -40,11 +42,13 @@ class Camera:
         self._send_command("6")  # Movie Rec Button
         self._send_command("y")  # Confirm Movie Rec Button
         self._send_command("2")  # Down
+        self._send_command("")
 
     def _stop_recording(self) -> None:
         self._send_command("6")  # Movie Rec Button
         self._send_command("y")  # Confirm Movie Rec Button
         self._send_command("1")  # Up
+        self._send_command("")
 
     def connect(self) -> None:
         self._start_remote_cli()

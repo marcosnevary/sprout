@@ -6,7 +6,7 @@ def current_timestamp() -> str:
 
 
 def countdown(interval: int, message: str) -> None:
-    for remaining in range(interval, 0, -1):
+    for remaining in range(interval, -1, -1):
         hours, remainder = divmod(remaining, 3600)
         minutes, seconds = divmod(remainder, 60)
 
@@ -16,4 +16,6 @@ def countdown(interval: int, message: str) -> None:
             flush=True,
         )
 
-        time.sleep(1)
+        if remaining > 0:
+            time.sleep(1)
+    print()
