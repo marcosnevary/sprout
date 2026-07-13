@@ -19,7 +19,10 @@ class Camera:
         self.remote_cli = subprocess.Popen(  # noqa: S603
             [self.remote_cli_path],
             stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
+            bufsize=1,
         )
 
     def _send_command(self, command: str) -> None:
