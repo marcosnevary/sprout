@@ -13,7 +13,6 @@ def main() -> None:
         remote_cli_path=RECORDING_CONFIG.remote_cli_path,
         ssh_password=RECORDING_CONFIG.ssh_password,
         recording_duration=RECORDING_CONFIG.recording_duration,
-        interval_between_recordings=RECORDING_CONFIG.interval_between_recordings,
         max_recordings=RECORDING_CONFIG.max_recordings,
     )
 
