@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from config.app import DATA_PATH, SPREADSHEET_NAME
 from config.recording import RECORDING_CONFIG, RECORDING_HEADER
 from devices.camera import Camera
@@ -31,7 +33,8 @@ def main() -> None:
         header=RECORDING_HEADER,
     )
 
-    latest_video_index = get_latest_video_index(RECORDING_CONFIG.videos_path)
+    videos_path = Path(RECORDING_CONFIG.videos_path)
+    latest_video_index = get_latest_video_index(videos_path)
 
     for i in range(RECORDING_CONFIG.max_recordings):
         camera.record()
@@ -42,7 +45,7 @@ def main() -> None:
 
         latest_video_index += 1
         latest_video_path = get_video_path(
-            RECORDING_CONFIG.videos_path,
+            videos_path,
             latest_video_index,
         )
 
