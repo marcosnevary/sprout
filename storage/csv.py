@@ -1,6 +1,8 @@
 import csv
 from pathlib import Path
 
+from video.metadata import VideoMetadata
+
 
 def ensure_directory(file_path: Path) -> None:
     file_path.mkdir(parents=True, exist_ok=True)
@@ -25,12 +27,22 @@ def save_measurement_to_csv(
 
 
 def save_metadata_to_csv(
-    metadata: dict[str, str],
+    metadata: VideoMetadata,
     file_path: Path,
 ) -> None:
     with file_path.open("a", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(metadata.values())
+        writer.writerow(
+            [
+                metadata.timestamp,
+                metadata.filename,
+                metadata.duration_seconds,
+                metadata.size_mb,
+                metadata.width_px,
+                metadata.height_px,
+                metadata.fps,
+            ]
+        )
 
 
 def initialize_csv(data_path: Path, filename: str, header: tuple[str, ...]) -> Path:
