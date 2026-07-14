@@ -34,31 +34,40 @@ def main() -> None:
     )
 
     videos_path = Path(RECORDING_CONFIG.videos_path)
-    latest_video_index = get_latest_video_index(videos_path)
 
     for i in range(RECORDING_CONFIG.max_recordings):
         camera.record()
 
-        latest_video_index += 1
-
-        print(
-            f"[{current_timestamp()}] Recording {i + 1} completed (C{latest_video_index}.MP4)."
-        )
-
         countdown(RECORDING_CONFIG.upload_duration, "Time for upload to complete")
 
+        latest_video_index = get_latest_video_index(videos_path)
         latest_video_path = get_video_path(
             videos_path,
             latest_video_index,
+        )
+
+        print(
+            f"[{current_timestamp()}] Recording {i + 1} completed (C{latest_video_index}.MP4)."
         )
 
         if latest_video_path.exists():
             metadata = extract_video_metadata(latest_video_path)
 
             save_metadata_to_csv(metadata, file_path)
+            print(
+                f"[{current_timestamp()}] Metadata for C{latest_video_index}.MP4 saved to {file_path}."
+            )
 
             if worksheet:
                 save_metadata_to_worksheet(metadata, worksheet)
+
+                print(
+                    f"[{current_timestamp()}] Metadata for C{latest_video_index}.MP4 saved to Google Sheets."
+                )
+        else:
+            print(
+                f"[{current_timestamp()}] Error: Video file {latest_video_path} does not exist."
+            )
 
         countdown(
             RECORDING_CONFIG.interval_between_recordings,
