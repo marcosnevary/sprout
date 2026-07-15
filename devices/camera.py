@@ -27,9 +27,10 @@ class Camera:
 
         time.sleep(5)
 
-    def _send_command(self, command: str) -> None:
+    def _send_command(self, command: str, delay: float = 1) -> None:
         self.remote_cli.stdin.write(f"{command}\n")
         self.remote_cli.stdin.flush()
+        time.sleep(delay)
 
     def _setup_camera_connection(self) -> None:
         self._send_command("1")

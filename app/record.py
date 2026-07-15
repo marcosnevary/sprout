@@ -40,6 +40,7 @@ def main() -> None:
 
         countdown(RECORDING_CONFIG.upload_duration, "Time for upload to complete")
 
+        # TODO: Improve the latest video logic
         latest_video_index = get_latest_video_index(videos_path)
         latest_video_path = get_video_path(
             videos_path,
