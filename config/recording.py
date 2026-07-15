@@ -22,6 +22,7 @@ class RecordingConfig:
     interval_between_recordings: int = 1_800
     upload_duration: int = 10
     max_recordings: int = 9_999_999
+    delay_between_commands: float = 1.0
     metadata_filename: str = "metadata.csv"
     metadata_worksheet_name: str = "METADATA"
 

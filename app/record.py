@@ -16,6 +16,7 @@ def main() -> None:
         ssh_password=RECORDING_CONFIG.ssh_password,
         recording_duration=RECORDING_CONFIG.recording_duration,
         max_recordings=RECORDING_CONFIG.max_recordings,
+        delay_between_commands=RECORDING_CONFIG.delay_between_commands,
     )
 
     camera.connect()

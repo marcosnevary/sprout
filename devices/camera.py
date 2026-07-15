@@ -9,11 +9,13 @@ class Camera:
         ssh_password: str,
         recording_duration: int,
         max_recordings: int,
+        delay_between_commands: float,
     ) -> None:
         self.remote_cli_path = remote_cli_path
         self.ssh_password = ssh_password
         self.recording_duration = recording_duration
         self.max_recordings = max_recordings
+        self.delay_between_commands = delay_between_commands
 
     def _start_remote_cli(self) -> None:
         self.remote_cli = subprocess.Popen(  # noqa: S603
@@ -27,10 +29,10 @@ class Camera:
 
         time.sleep(5)
 
-    def _send_command(self, command: str, delay: float = 1) -> None:
+    def _send_command(self, command: str) -> None:
         self.remote_cli.stdin.write(f"{command}\n")
         self.remote_cli.stdin.flush()
-        time.sleep(delay)
+        time.sleep(self.delay_between_commands)
 
     def _setup_camera_connection(self) -> None:
         self._send_command("1")
@@ -57,7 +59,7 @@ class Camera:
 
     def record(self) -> None:
         self._start_recording()
-        time.sleep(self.recording_duration)
+        time.sleep(self.recording_duration - 4 * self.delay_between_commands)
         self._stop_recording()
 
     def cleanup(self) -> None:
