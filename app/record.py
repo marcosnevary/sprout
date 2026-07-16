@@ -11,22 +11,11 @@ from video.metadata import extract_video_metadata
 
 
 def main() -> None:
-    camera = Camera(
-        remote_cli_path=RECORDING_CONFIG.remote_cli_path,
-        ssh_password=RECORDING_CONFIG.ssh_password,
-        recording_duration=RECORDING_CONFIG.recording_duration,
-        max_recordings=RECORDING_CONFIG.max_recordings,
-        delay_between_commands=RECORDING_CONFIG.delay_between_commands,
-    )
-
-    camera.connect()
-
     file_path = initialize_csv(
         data_path=DATA_PATH,
         filename=RECORDING_CONFIG.metadata_filename,
         header=RECORDING_HEADER,
     )
-
     worksheet = initialize_worksheet(
         credentials_file="credentials.json",
         spreadsheet_name=SPREADSHEET_NAME,
@@ -35,18 +24,34 @@ def main() -> None:
     )
 
     videos_path = Path(RECORDING_CONFIG.videos_path)
+    previous_video_index = get_latest_video_index(videos_path)
+
+    camera = Camera(
+        remote_cli_path=RECORDING_CONFIG.remote_cli_path,
+        ssh_password=RECORDING_CONFIG.ssh_password,
+        recording_duration=RECORDING_CONFIG.recording_duration,
+        max_recordings=RECORDING_CONFIG.max_recordings,
+        delay_between_commands=RECORDING_CONFIG.delay_between_commands,
+    )
+    camera.connect()
 
     for i in range(RECORDING_CONFIG.max_recordings):
         camera.record()
 
         countdown(RECORDING_CONFIG.upload_duration, "Time for upload to complete")
 
-        # TODO: Improve the latest video logic
         latest_video_index = get_latest_video_index(videos_path)
         latest_video_path = get_video_path(
             videos_path,
             latest_video_index,
         )
+
+        if latest_video_index == previous_video_index:
+            print(
+                f"[{current_timestamp()}] No new video detected after recording {i + 1}. Recovering RemoteCli."
+            )
+            camera.recover()
+            continue
 
         print(
             f"[{current_timestamp()}] Recording {i + 1} completed (C{latest_video_index}.MP4)."
@@ -66,6 +71,8 @@ def main() -> None:
                 print(
                     f"[{current_timestamp()}] Metadata for C{latest_video_index}.MP4 saved to Google Sheets."
                 )
+
+            previous_video_index = latest_video_index
         else:
             print(
                 f"[{current_timestamp()}] Error: Video file {latest_video_path} does not exist."
